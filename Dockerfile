@@ -6,7 +6,7 @@ ENV TZ=Asia/Singapore
 ENV DISPLAY=:1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    cinnamon-core \
+    kde-plasma-desktop \
     dbus-x11 \
     tigervnc-standalone-server \
     tigervnc-tools \
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xterm \
     ca-certificates \
     fonts-dejavu-core \
+    sudo \
     && useradd -m -s /bin/bash desktop \
     && mkdir -p /home/desktop/.vnc \
     && chown -R desktop:desktop /home/desktop \
