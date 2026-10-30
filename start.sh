@@ -62,6 +62,22 @@ chown desktop:desktop "$HOME/.vnc/passwd"
 # Start the protected VNC desktop.
 su -s /bin/bash desktop -c 'tigervncserver :1 -localhost yes -geometry 1280x720 -depth 24 -SecurityTypes VncAuth -PasswordFile /home/desktop/.vnc/passwd'
 
+# Make the public root URL return a page for DockHosting's health check.
+# The noVNC client itself is available at /vnc.html.
+cat > /usr/share/novnc/index.html <<'EOF'
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0; url=/vnc.html">
+  <title>Opening PuffCloudPC</title>
+</head>
+<body>
+  <p>Opening <a href="/vnc.html">PuffCloudPC</a>…</p>
+</body>
+</html>
+EOF
+
 # Serve noVNC over the hosting platform's HTTP port.
 PORT="${PORT:-3000}"
 exec websockify --web=/usr/share/novnc "$PORT" 127.0.0.1:5901
