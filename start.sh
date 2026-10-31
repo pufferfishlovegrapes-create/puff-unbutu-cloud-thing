@@ -16,7 +16,7 @@ if [ -z "${DESKTOP_PASSWORD:-}" ]; then
 fi
 
 # Set the Linux account password separately from the VNC connection password.
-printf '%s:%s\\n' desktop "$DESKTOP_PASSWORD" | chpasswd
+printf '%s:%s\n' desktop "$DESKTOP_PASSWORD" | chpasswd
 
 mkdir -p "$HOME/.vnc" "$HOME/.config/openbox"
 chown -R desktop:desktop "$HOME"
@@ -28,7 +28,6 @@ unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 export XDG_SESSION_TYPE=x11
 export XDG_CURRENT_DESKTOP=Openbox
-export MOZ_DISABLE_RDD_SANDBOX=0
 tint2 &
 pcmanfm --desktop --profile LXDE &
 exec dbus-launch --exit-with-session openbox-session
@@ -37,7 +36,7 @@ EOF
 chmod +x "$HOME/.vnc/xstartup"
 chown -R desktop:desktop "$HOME/.vnc" "$HOME/.config"
 
-printf '%s\\n' "$VNC_PASSWORD" | tigervncpasswd -f > "$HOME/.vnc/passwd"
+printf '%s\n' "$VNC_PASSWORD" | tigervncpasswd -f > "$HOME/.vnc/passwd"
 chmod 600 "$HOME/.vnc/passwd"
 chown desktop:desktop "$HOME/.vnc/passwd"
 
