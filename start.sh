@@ -13,7 +13,7 @@ fi
 mkdir -p "$HOME/.vnc" "$HOME/.config/autostart" "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
 chown -R desktop:desktop "$HOME"
 
-# Configure XFCE to use a modern dark theme and Papirus icons.
+# Configure XFCE's appearance without starting extra desktop components.
 cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xsettings" version="1.0">
@@ -30,17 +30,22 @@ cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" <<'EOF'
 </channel>
 EOF
 
-# Add a lightweight dock to XFCE's autostart.
-cat > "$HOME/.config/autostart/plank.desktop" <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=Plank Dock
-Exec=plank
-OnlyShowIn=XFCE;
-X-GNOME-Autostart-enabled=true
+# Disable XFCE window compositing to reduce graphics and CPU overhead.
+cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfwm4" version="1.0">
+  <property name="general" type="empty">
+    <property name="use_compositing" type="bool" value="false"/>
+    <property name="cycle_preview" type="bool" value="false"/>
+    <property name="show_frame_shadow" type="bool" value="false"/>
+  </property>
+</channel>
 EOF
 
-# Launch XFCE rather than the old Cinnamon/KDE session.
+# Do not autostart Plank; the standard XFCE panel is lighter.
+rm -f "$HOME/.config/autostart/plank.desktop"
+
+# Launch XFCE rather than a heavier desktop session.
 cat > "$HOME/.vnc/xstartup" <<'EOF'
 #!/bin/sh
 unset SESSION_MANAGER
@@ -59,11 +64,10 @@ printf '%s\n' "$VNC_PASSWORD" | tigervncpasswd -f > "$HOME/.vnc/passwd"
 chmod 600 "$HOME/.vnc/passwd"
 chown desktop:desktop "$HOME/.vnc/passwd"
 
-# Start the protected VNC desktop.
-su -s /bin/bash desktop -c 'tigervncserver :1 -localhost yes -geometry 1280x720 -depth 24 -SecurityTypes VncAuth -PasswordFile /home/desktop/.vnc/passwd'
+# Use a smaller 16-bit desktop to reduce VNC rendering and network traffic.
+su -s /bin/bash desktop -c 'tigervncserver :1 -localhost yes -geometry 1024x768 -depth 16 -SecurityTypes VncAuth -PasswordFile /home/desktop/.vnc/passwd'
 
 # Make the public root URL return a page for DockHosting's health check.
-# The noVNC client itself is available at /vnc.html.
 cat > /usr/share/novnc/index.html <<'EOF'
 <!doctype html>
 <html lang="en">
