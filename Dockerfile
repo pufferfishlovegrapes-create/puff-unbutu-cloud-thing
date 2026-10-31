@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update \
     && apt-get install -y --no-install-recommends firefox \
     && useradd -m -s /bin/bash desktop \
-    && mkdir -p /home/desktop/.vnc /home/desktop/.config/openbox /home/desktop/.mozilla/firefox \
+    && mkdir -p /home/desktop/.vnc /home/desktop/.config/openbox \
     && printf '%s\n' 'user_pref("dom.ipc.processCount", 1);' 'user_pref("browser.sessionstore.interval", 60000);' 'user_pref("gfx.webrender.disabled", true);' 'user_pref("layers.acceleration.disabled", true);' > /home/desktop/.mozilla/firefox/user.js \
     && chown -R desktop:desktop /home/desktop \
     && apt-get clean \
