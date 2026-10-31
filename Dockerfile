@@ -3,21 +3,22 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Singapore
 ENV DISPLAY=:1
+ENV QT_X11_NO_MITSHM=1
 
-# Install a lightweight XFCE desktop, browser, VNC server and noVNC.
-# Firefox is installed from Mozilla's official APT repository so it works
-# without Snap/systemd inside this container.
+# Install KDE Plasma for an X11/VNC session, plus Firefox and noVNC.
+# Ubuntu 24.04 provides Plasma 5.27 in its standard repositories.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     gnupg \
     dbus-x11 \
-    xfce4 \
-    xfce4-goodies \
-    xfce4-terminal \
-    thunar \
-    nemo \
-    xfce4-whiskermenu-plugin \
+    kde-plasma-desktop \
+    dolphin \
+    konsole \
+    kwin-x11 \
+    breeze \
+    breeze-gtk-theme \
+    breeze-icon-theme \
     tigervnc-standalone-server \
     tigervnc-tools \
     novnc \
@@ -25,13 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xterm \
     fonts-dejavu-core \
     fonts-inter \
-    arc-theme \
-    papirus-icon-theme \
-    plank \
+    fonts-noto \
     sudo \
-    git \
-    make \
-    pysassc \
     && install -d -m 0755 /etc/apt/keyrings \
     && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
     && chmod 0644 /etc/apt/keyrings/packages.mozilla.org.asc \
@@ -39,13 +35,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && printf "Package: *\\nPin: origin packages.mozilla.org\\nPin-Priority: 1000\\n" > /etc/apt/preferences.d/mozilla \
     && apt-get update \
     && apt-get install -y --no-install-recommends firefox \
-    && git clone --depth 1 https://github.com/linuxmint/mint-themes.git /tmp/mint-themes \
-    && cd /tmp/mint-themes && make && cp -a usr/share/themes/. /usr/share/themes/ \
-    && git clone --depth 1 https://github.com/linuxmint/mint-y-icons.git /tmp/mint-y-icons \
-    && cp -a /tmp/mint-y-icons/usr/share/icons/. /usr/share/icons/ \
-    && rm -rf /tmp/mint-themes /tmp/mint-y-icons \
     && useradd -m -s /bin/bash desktop \
-    && mkdir -p /home/desktop/.vnc /home/desktop/.config/autostart \
+    && mkdir -p /home/desktop/.vnc /home/desktop/.config \
     && chown -R desktop:desktop /home/desktop \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
