@@ -18,6 +18,14 @@ fi
 # Set the Linux account password separately from the VNC connection password.
 printf '%s:%s\n' desktop "$DESKTOP_PASSWORD" | chpasswd
 
+if [ -z "${DESKTOP_PASSWORD:-}" ]; then
+    echo "ERROR: Set the DESKTOP_PASSWORD environment variable."
+    exit 1
+fi
+
+# Set the Linux account password separately from the VNC connection password.
+printf '%s:%s\n' desktop "$DESKTOP_PASSWORD" | chpasswd
+
 mkdir -p "$HOME/.vnc" "$HOME/.config/openbox"
 chown -R desktop:desktop "$HOME"
 
