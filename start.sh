@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 export HOME=/home/desktop
 export USER=desktop
@@ -15,41 +15,29 @@ if [ -z "${DESKTOP_PASSWORD:-}" ]; then
     exit 1
 fi
 
-# Set the Linux account password separately from the VNC connection password.
+# Keep the Linux login password separate from the VNC connection password.
 printf '%s:%s\n' desktop "$DESKTOP_PASSWORD" | chpasswd
 
-if [ -z "${DESKTOP_PASSWORD:-}" ]; then
-    echo "ERROR: Set the DESKTOP_PASSWORD environment variable."
+mkdir -p "$HOME/.config/tigervnc" "$HOME/.config"
+chown -R desktop:desktop "$HOME"
+
+# TigerVNC's Arch/Manjaro package uses vncpasswd and Xvnc.
+printf '%s\n' "$VNC_PASSWORD" | su -s /bin/bash desktop -c 'vncpasswd -f > /home/desktop/.config/tigervnc/passwd'
+chmod 600 "$HOME/.config/tigervnc/passwd"
+chown desktop:desktop "$HOME/.config/tigervnc/passwd"
+
+# Use a sharper 1280x720, 24-bit display instead of the old 800x600, 16-bit setup.
+su -s /bin/bash desktop -c 'Xvnc :1 -localhost -geometry "${VNC_GEOMETRY:-1280x720}" -depth 24 -rfbauth /home/desktop/.config/tigervnc/passwd -SecurityTypes VncAuth -AlwaysShared' &
+XVNC_LAUNCHER_PID=$!
+
+# Give the virtual display a moment to start before launching XFCE.
+sleep 2
+if ! kill -0 "$XVNC_LAUNCHER_PID" 2>/dev/null; then
+    echo "ERROR: TigerVNC failed to start."
     exit 1
 fi
 
-# Set the Linux account password separately from the VNC connection password.
-printf '%s:%s\n' desktop "$DESKTOP_PASSWORD" | chpasswd
-
-mkdir -p "$HOME/.vnc" "$HOME/.config/openbox"
-chown -R desktop:desktop "$HOME"
-
-# Start a minimal Openbox session without KDE, KWin, or desktop compositing.
-cat > "$HOME/.vnc/xstartup" <<'EOF'
-#!/bin/sh
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
-export XDG_SESSION_TYPE=x11
-export XDG_CURRENT_DESKTOP=Openbox
-tint2 &
-pcmanfm --desktop --profile LXDE &
-exec dbus-launch --exit-with-session openbox-session
-EOF
-
-chmod +x "$HOME/.vnc/xstartup"
-chown -R desktop:desktop "$HOME/.vnc" "$HOME/.config"
-
-printf '%s\n' "$VNC_PASSWORD" | tigervncpasswd -f > "$HOME/.vnc/passwd"
-chmod 600 "$HOME/.vnc/passwd"
-chown desktop:desktop "$HOME/.vnc/passwd"
-
-# Lower resolution reduces the amount of screen data VNC must encode.
-su -s /bin/bash desktop -c 'tigervncserver :1 -localhost yes -geometry 800x600 -depth 16 -SecurityTypes VncAuth -PasswordFile /home/desktop/.vnc/passwd'
+su -s /bin/bash desktop -c 'export DISPLAY=:1; exec dbus-launch --exit-with-session startxfce4' &
 
 cat > /usr/share/novnc/index.html <<'EOF'
 <!doctype html>
