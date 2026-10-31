@@ -1,40 +1,48 @@
-FROM manjarolinux/base:latest
+FROM ubuntu:24.04
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=en_US.UTF-8
 ENV TZ=Asia/Singapore
 ENV DISPLAY=:1
 
-# Official Manjaro base + the Manjaro-configured XFCE desktop.
-RUN pacman-key --init \
-    && pacman-mirrors --fasttrack 5 \
-    && pacman -Syyu --noconfirm --needed archlinux-keyring manjaro-keyring \
-    && pacman-key --populate archlinux manjaro \
-    && pacman -Syu --noconfirm --needed \
+# Linux Mint 22.x is built on Ubuntu 24.04. Use the same stable Ubuntu base,
+# then install the official Linux Mint theme and icon sources with XFCE.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        dbus-x11 \
+        git \
         xfce4 \
         xfce4-goodies \
         xfce4-terminal \
         xfce4-whiskermenu-plugin \
-        network-manager-applet \
         xfce4-notifyd \
+        thunar \
+        thunar-archive-plugin \
         tumbler \
-        engrampa \
-        manjaro-xfce-settings \
-        manjaro-settings-manager \
-        tigervnc \
+        file-roller \
+        network-manager-gnome \
+        tigervnc-standalone-server \
+        tigervnc-tools \
         novnc \
         websockify \
         firefox \
-        dbus \
-        xorg-xauth \
-        xorg-xrandr \
-        xorg-xsetroot \
         sudo \
-        noto-fonts \
-        ttf-dejavu \
+        locales \
+        fonts-noto \
+        fonts-dejavu \
+    && locale-gen en_US.UTF-8 \
+    && git clone --depth 1 https://github.com/linuxmint/mint-themes.git /tmp/mint-themes \
+    && git clone --depth 1 https://github.com/linuxmint/mint-y-icons.git /tmp/mint-y-icons \
+    && git clone --depth 1 https://github.com/linuxmint/mint-x-icons.git /tmp/mint-x-icons \
+    && mkdir -p /usr/share/themes /usr/share/icons \
+    && cp -a /tmp/mint-themes/files/usr/share/themes/. /usr/share/themes/ \
+    && cp -a /tmp/mint-y-icons/usr/share/icons/. /usr/share/icons/ \
+    && cp -a /tmp/mint-x-icons/usr/share/icons/. /usr/share/icons/ \
     && useradd -m -s /bin/bash desktop \
     && mkdir -p /home/desktop/.config/tigervnc /home/desktop/.mozilla/firefox \
     && chown -R desktop:desktop /home/desktop \
-    && pacman -Scc --noconfirm
+    && rm -rf /tmp/mint-themes /tmp/mint-y-icons /tmp/mint-x-icons /var/lib/apt/lists/*
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
