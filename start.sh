@@ -10,50 +10,20 @@ if [ -z "${VNC_PASSWORD:-}" ]; then
     exit 1
 fi
 
-mkdir -p "$HOME/.vnc" "$HOME/.config/autostart" "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+mkdir -p "$HOME/.vnc" "$HOME/.config"
 chown -R desktop:desktop "$HOME"
 
-# Configure XFCE's appearance without starting extra desktop components.
-cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<channel name="xsettings" version="1.0">
-  <property name="Net" type="empty">
-    <property name="ThemeName" type="string" value="Mint-Y-Dark"/>
-    <property name="IconThemeName" type="string" value="Mint-Y"/>
-    <property name="DoubleClickTime" type="int" value="400"/>
-    <property name="DoubleClickDistance" type="int" value="5"/>
-  </property>
-  <property name="Gtk" type="empty">
-    <property name="FontName" type="string" value="Inter 10"/>
-    <property name="CursorThemeName" type="string" value="Adwaita"/>
-  </property>
-</channel>
-EOF
-
-# Disable XFCE window compositing to reduce graphics and CPU overhead.
-cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml" <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<channel name="xfwm4" version="1.0">
-  <property name="general" type="empty">
-    <property name="use_compositing" type="bool" value="false"/>
-    <property name="cycle_preview" type="bool" value="false"/>
-    <property name="show_frame_shadow" type="bool" value="false"/>
-  </property>
-</channel>
-EOF
-
-# Do not autostart Plank; the standard XFCE panel is lighter.
-rm -f "$HOME/.config/autostart/plank.desktop"
-
-# Launch XFCE rather than a heavier desktop session.
+# Start a KDE Plasma X11 session inside TigerVNC.
 cat > "$HOME/.vnc/xstartup" <<'EOF'
 #!/bin/sh
 unset SESSION_MANAGER
 unset DBUS_SESSION_BUS_ADDRESS
 export XDG_SESSION_TYPE=x11
-export XDG_CURRENT_DESKTOP=XFCE
-export DESKTOP_SESSION=xfce
-exec dbus-launch --exit-with-session startxfce4
+export XDG_CURRENT_DESKTOP=KDE
+export DESKTOP_SESSION=plasma
+export KDE_FULL_SESSION=true
+export QT_X11_NO_MITSHM=1
+exec dbus-launch --exit-with-session startplasma-x11
 EOF
 
 chmod +x "$HOME/.vnc/xstartup"
