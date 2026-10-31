@@ -19,7 +19,7 @@ cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" <<'EOF'
 <channel name="xsettings" version="1.0">
   <property name="Net" type="empty">
     <property name="ThemeName" type="string" value="Mint-Y-Dark"/>
-    <property name="IconThemeName" type="string" value="Mint-Y-Dark"/>
+    <property name="IconThemeName" type="string" value="Mint-Y"/>
     <property name="DoubleClickTime" type="int" value="400"/>
     <property name="DoubleClickDistance" type="int" value="5"/>
   </property>
