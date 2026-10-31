@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     git \
     make \
-    python3-sassc \
+    pysassc \
     && install -d -m 0755 /etc/apt/keyrings \
     && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
     && chmod 0644 /etc/apt/keyrings/packages.mozilla.org.asc \
