@@ -1,4 +1,4 @@
-FROM lscr.io/linuxserver/webtop:ubuntu-kde
+FROM lscr.io/linuxserver/webtop:arch-kde
 
 ENV PUID=1000
 ENV PGID=1000
